@@ -43,3 +43,61 @@ func TestUnpackInvalidString(t *testing.T) {
 		})
 	}
 }
+
+func TestUnpackOnlyUnicodeChars(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{input: "а4бс2д5е2", expected: "аааабссдддддее"},
+		{input: "абссд", expected: "абссд"},
+		{input: "ааа0б", expected: "ааб"},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			result, err := Unpack(tc.input)
+			require.NoError(t, err)
+			require.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestUnpackMixChars(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{input: "a4bc2д5e", expected: "aaaabccдддддe"},
+		{input: "abддd", expected: "abддd"},
+		{input: "aaб0b", expected: "aab"},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			result, err := Unpack(tc.input)
+			require.NoError(t, err)
+			require.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestUnpackSpecialChars(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{input: "-3?2", expected: "---??"},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			result, err := Unpack(tc.input)
+			require.NoError(t, err)
+			require.Equal(t, tc.expected, result)
+		})
+	}
+}
